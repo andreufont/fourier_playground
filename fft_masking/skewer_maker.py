@@ -5,7 +5,7 @@ class SkewerMaker(object):
     """Object to generate random skewers"""
 
 
-    def __init__(self,N,L,input_power,seed=1234):
+    def __init__(self,N,L,input_power,SiIII_model=None,seed=1234):
         """Define here FFT grid and input power"""
 
         # specify FFT grid
@@ -20,6 +20,9 @@ class SkewerMaker(object):
         norm = (N/self.dx)
         self.inP=norm*input_power.get_true_p1d(np.abs(self.k))
 
+        # optionally add SiIII(1207) contamination to the skewers
+        self.SiIII_model=SiIII_model
+    
         # ratio of PX over P1D (if making pairs of skewers)
         self.f_px=input_power.f_px
 
@@ -51,6 +54,10 @@ class SkewerMaker(object):
 
         # remember that F(-k) = F^*(k)
         modes[(N+1)//2+1:]=np.conj(modes[1:(N+1)//2])[::-1]
+
+        # add contamination by SiIII(1207) to the Fourier modes
+        if self.SiIII_model:
+            modes *= self.SiIII_model.mode_contamination(self.k)
         
         return modes
 
@@ -59,6 +66,7 @@ class SkewerMaker(object):
         """Generate random Gaussian skewer"""
 
         modes=self.make_gaussian_modes()
+
         return np.fft.ifft(modes).real
 
 
@@ -70,7 +78,6 @@ class SkewerMaker(object):
         modes_C=self.make_gaussian_modes()
 
         # correlate modes, taking into account PX = f_px P1D
-        self.f_px
         modes_B = self.f_px * modes_A + np.sqrt(1-self.f_px**2) * modes_C
 
         # iFFT to get skewers

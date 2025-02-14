@@ -5,14 +5,12 @@ class InputPower(object):
     """Setup an initial power object given input parameters"""
 
 
-    def __init__(self,P0=1.0,k0=1,kF=10,r_SiIII=20,f_SiIII=0.05,f_px=0.2):
+    def __init__(self,P0=1.0,k0=1,kF=10,f_px=0.2):
         """Define here your favorite power spectrum."""
 
         self.P0=P0
         self.k0=k0
         self.kF=kF
-        self.r_SiIII=r_SiIII
-        self.f_SiIII=f_SiIII
         self.f_px=f_px
 
 
@@ -45,9 +43,6 @@ class InputPower(object):
 
         # further suppressed with a Gaussian at kF=10
         P *= np.exp(-(k/self.kF)**2)
-
-        # SiIII(1207) contamination
-        P *= (1+self.f_SiIII*np.cos(k*self.r_SiIII))
 
         # PX will be a scaled version of P1D, for now
         if is_px:
